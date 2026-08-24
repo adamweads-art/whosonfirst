@@ -6,15 +6,19 @@
    --------------------------------------------------------------------------- */
 
 :root {
-  --ledger: #edebe3;
-  --ledger-deep: #e2dfd4;
-  --card: #f7f6f1;
-  --ink: #1c1f1a;
-  --ink-soft: #5a5f56;
-  --rule: #b0b5a8;
-  --rule-faint: #d3d6cc;
-  --red: #c8402e;
-  --blue: #2b4c7e;
+  /* Oakland A's palette: kelly green and gold against a cream page. The
+     ledger cream stays so the design still reads as a document rather than a
+     sports app, but the ink and accents are all from the uniform. */
+  --ledger: #f5f1e6;
+  --ledger-deep: #ebe6d5;
+  --card: #fbf9f1;
+  --ink: #003831;         /* A's kelly green */
+  --ink-hover: #00201c;   /* darker green for pressed states */
+  --ink-soft: #4a6b60;
+  --rule: #b8b39e;
+  --rule-faint: #d9d4c1;
+  --red: #efb21e;         /* A's gold, used where scorer's red used to go */
+  --blue: #003831;        /* same green, so nothing reads as flag-blue */
 
   --display: 'Barlow Condensed', system-ui, sans-serif;
   --body: 'Barlow', system-ui, sans-serif;
@@ -82,8 +86,11 @@ h3 { font-size: 1rem; }
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.5rem 1rem;
+  flex-wrap: wrap;
 }
+
+.masthead h1 { font-size: clamp(1.4rem, 6.5vw, 1.75rem); }
 
 .stack > * + * { margin-top: var(--gap); }
 
@@ -160,7 +167,7 @@ h3 { font-size: 1rem; }
   cursor: pointer;
 }
 
-.btn:hover { background: var(--red); }
+.btn:hover { background: var(--ink-hover); }
 .btn:disabled { background: var(--rule); cursor: not-allowed; }
 
 .btn-quiet {
@@ -170,6 +177,25 @@ h3 { font-size: 1rem; }
 }
 
 .btn-quiet:hover { background: var(--ledger-deep); color: var(--ink); }
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.action-row .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 360px) {
+  .action-row { grid-template-columns: 1fr; }
+}
 
 a { color: var(--blue); }
 

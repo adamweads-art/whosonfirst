@@ -71,7 +71,7 @@ export default async function GamePage({ params }) {
         <div>
           <span className="eyebrow">
             <Link href="/" style={{ textDecoration: 'none' }}>
-              ← Games
+              ← Who&rsquo;s on First?
             </Link>
           </span>
           <h1 style={{ marginTop: '0.15rem' }}>
@@ -82,6 +82,19 @@ export default async function GamePage({ params }) {
       </div>
 
       <div className="stack">
+        {inningCount > 0 && (
+          <div className="action-row no-print">
+            <a href="#build" className="btn btn-quiet">
+              Build lineup
+            </a>
+            <Link href={`/game/${game.id}/log`} className="btn btn-quiet">
+              {game.inningsPlayed != null
+                ? `Logged ${game.inningsPlayed} innings`
+                : 'What happened'}
+            </Link>
+          </div>
+        )}
+
         {inningCount > 0 && (
           <section className="panel">
             <div
@@ -187,12 +200,14 @@ export default async function GamePage({ params }) {
           </section>
         )}
 
-        <GameClient
-          game={game}
-          roster={roster}
-          initialAbsent={game.absentIds}
-          gridInnings={inningCount}
-        />
+        <div id="build" style={{ scrollMarginTop: '1rem' }}>
+          <GameClient
+            game={game}
+            roster={roster}
+            initialAbsent={game.absentIds}
+            gridInnings={inningCount}
+          />
+        </div>
 
         {inningCount > 0 && (
           <Link
@@ -207,7 +222,7 @@ export default async function GamePage({ params }) {
           >
             {game.inningsPlayed != null
               ? `Logged ${game.inningsPlayed} innings`
-              : 'Log what happened'}
+              : 'What happened'}
           </Link>
         )}
       </div>

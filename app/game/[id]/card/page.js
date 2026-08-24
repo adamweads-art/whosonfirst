@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import { getRoster, getGame, getAssignments } from '../../../../lib/airtable';
 import { activePositions } from '../../../../lib/rotation';
+import PrintButton from './PrintButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,11 +103,11 @@ export default async function CardPage({ params }) {
         <div className="masthead">
           <span className="eyebrow">
             <Link href={`/game/${game.id}`} style={{ textDecoration: 'none' }}>
-              ← Back
+              ← Who&rsquo;s on First?
             </Link>
           </span>
-          <span className="eyebrow">Print or save as PDF</span>
         </div>
+        <PrintButton />
       </div>
 
       <div className="card-page">

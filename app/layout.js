@@ -1,14 +1,14 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Lineup',
+  title: "Who's on First",
   description: 'Batting order and field assignments',
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#edebe3',
+  themeColor: '#003831',
 };
 
 export default function RootLayout({ children }) {

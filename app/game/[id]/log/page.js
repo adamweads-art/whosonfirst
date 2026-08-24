@@ -41,7 +41,7 @@ export default async function LogPage({ params }) {
         <div>
           <span className="eyebrow">
             <Link href={`/game/${game.id}`} style={{ textDecoration: 'none' }}>
-              ← Back
+              ← Who&rsquo;s on First?
             </Link>
           </span>
           <h1 style={{ marginTop: '0.15rem' }}>After the game</h1>

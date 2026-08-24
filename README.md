@@ -1,4 +1,4 @@
-# Who's On First - Lineup Manager
+# Who's on First
 
 Batting order and field assignments for a youth baseball team, backed by Airtable.
 

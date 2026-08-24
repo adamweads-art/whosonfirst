@@ -18,7 +18,7 @@ export default async function Home() {
     return (
       <main className="wrap">
         <div className="masthead">
-          <h1>Lineup</h1>
+          <h1>Who&rsquo;s on First</h1>
         </div>
         <div className="notice">
           Airtable is not connected yet. Add <code>AIRTABLE_BASE_ID</code> and{' '}
@@ -43,7 +43,7 @@ export default async function Home() {
   return (
     <main className="wrap">
       <div className="masthead">
-        <h1>Lineup</h1>
+        <h1>Who&rsquo;s on First</h1>
         <span className="eyebrow">{games.length} games</span>
       </div>
 

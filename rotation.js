@@ -6,14 +6,14 @@
  * That is what makes it testable in isolation.
  */
 
-export const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
-export const INFIELD = ['P', 'C', '1B', '2B', '3B', 'SS'];
+const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
+const INFIELD = ['P', 'C', '1B', '2B', '3B', 'SS'];
 
-// Order in which outfield spots get filled as the roster shrinks. When there's
-// only one outfielder, we want them in center rather than stranded in a corner.
+// Order in which outfield spots get filled as the roster shrinks.
+// With one outfielder you want them roughly in center, not stranded in right.
 const OUTFIELD_FILL_ORDER = ['CF', 'LF', 'RF'];
 
-export const MIN_PLAYERS = 7;
+const MIN_PLAYERS = 7;
 const MAX_INNINGS = 6;
 
 // ---------------------------------------------------------------------------
@@ -43,7 +43,7 @@ function makeRng(seed) {
 /**
  * Six infielders always. Outfielders are whatever is left over, capped at four.
  */
-export function activePositions(playerCount) {
+function activePositions(playerCount) {
   if (playerCount < MIN_PLAYERS) {
     throw new Error(
       `Only ${playerCount} players available. Need at least ${MIN_PLAYERS} to field a team.`
@@ -61,7 +61,7 @@ export function activePositions(playerCount) {
  * Hard constraints only. A player is eligible for a position if they have not
  * excluded it and, for P and C, if they are in that pool.
  */
-export function isEligible(player, position) {
+function isEligible(player, position) {
   if (player.exclusions && player.exclusions.includes(position)) return false;
   if (position === 'P' && !player.pitcherPool) return false;
   if (position === 'C' && !player.catcherPool) return false;
@@ -76,7 +76,7 @@ export function isEligible(player, position) {
  * Order stays fixed by the roster's Batting Order field. Leadoff rotates
  * forward one slot per game, wrapping around the present players.
  */
-export function buildBattingOrder(activeRoster, gameNumber) {
+function buildBattingOrder(activeRoster, gameNumber) {
   const sorted = [...activeRoster].sort((a, b) => a.battingOrder - b.battingOrder);
   if (sorted.length === 0) return [];
   const leadoff = ((gameNumber - 1) % sorted.length + sorted.length) % sorted.length;
@@ -99,7 +99,7 @@ export function buildBattingOrder(activeRoster, gameNumber) {
  * @returns {Object} {battingOrder, innings, warnings}
  *   innings is an array of {playerId: position|'Bench'} maps, one per inning.
  */
-export function generateLineup(opts) {
+function generateLineup(opts) {
   const {
     players,
     absentIds = [],
@@ -279,7 +279,7 @@ export function generateLineup(opts) {
  * @param {Array} assignments  {playerId, gameId, innings: ['SS','Bench',...]}
  * @param {Object} gameInningsPlayed  {gameId: number|null}. null means as planned.
  */
-export function recomputeTallies(assignments, gameInningsPlayed = {}) {
+function recomputeTallies(assignments, gameInningsPlayed = {}) {
   const tallies = {};
 
   for (const a of assignments) {
@@ -301,3 +301,14 @@ export function recomputeTallies(assignments, gameInningsPlayed = {}) {
 
   return tallies;
 }
+
+module.exports = {
+  POSITIONS,
+  INFIELD,
+  MIN_PLAYERS,
+  activePositions,
+  isEligible,
+  buildBattingOrder,
+  generateLineup,
+  recomputeTallies,
+};
