@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getGames, isConfigured } from '../lib/airtable';
+import Logo from './Logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ export default async function Home() {
     return (
       <main className="wrap">
         <div className="masthead">
-          <h1>Who&rsquo;s on First</h1>
+          <Logo width={180} priority />
         </div>
         <div className="notice">
           Airtable is not connected yet. Add <code>AIRTABLE_BASE_ID</code> and{' '}
@@ -43,7 +44,7 @@ export default async function Home() {
   return (
     <main className="wrap">
       <div className="masthead">
-        <h1>Who&rsquo;s on First</h1>
+        <Logo width={180} priority />
         <span className="eyebrow">{games.length} games</span>
       </div>
 

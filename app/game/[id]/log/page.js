@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getGame } from '../../../../lib/airtable';
+import Logo from '../../../Logo';
 import LogClient from './LogClient';
 
 export const dynamic = 'force-dynamic';
@@ -39,12 +40,10 @@ export default async function LogPage({ params }) {
     <main className="wrap">
       <div className="masthead">
         <div>
-          <span className="eyebrow">
-            <Link href={`/game/${game.id}`} style={{ textDecoration: 'none' }}>
-              ← Who&rsquo;s on First?
-            </Link>
-          </span>
-          <h1 style={{ marginTop: '0.15rem' }}>After the game</h1>
+          <Link href={`/game/${game.id}`} aria-label="Back to game" style={{ display: 'inline-block' }}>
+            <Logo width={110} />
+          </Link>
+          <h1 style={{ marginTop: '0.5rem' }}>After the game</h1>
         </div>
       </div>
 

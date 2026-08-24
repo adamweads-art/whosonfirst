@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getRoster, getGame, getAssignments } from '../../../lib/airtable';
 import { activePositions } from '../../../lib/rotation';
+import Logo from '../../Logo';
 import GameClient from './GameClient';
 
 export const dynamic = 'force-dynamic';
@@ -69,12 +70,10 @@ export default async function GamePage({ params }) {
     <main className="wrap">
       <div className="masthead">
         <div>
-          <span className="eyebrow">
-            <Link href="/" style={{ textDecoration: 'none' }}>
-              ← Who&rsquo;s on First?
-            </Link>
-          </span>
-          <h1 style={{ marginTop: '0.15rem' }}>
+          <Link href="/" aria-label="Back to games" style={{ display: 'inline-block' }}>
+            <Logo width={110} />
+          </Link>
+          <h1 style={{ marginTop: '0.5rem' }}>
             {game.opponent || game.label}
           </h1>
         </div>
