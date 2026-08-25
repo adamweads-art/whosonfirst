@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getGames, isConfigured } from '../lib/airtable';
 import Logo from './Logo';
+import AddGame from './AddGame';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,9 @@ export default async function Home() {
     <main className="wrap">
       <div className="masthead">
         <Logo width={180} priority />
-        <span className="eyebrow">{games.length} games</span>
+        <Link href="/game/new" className="add-btn" aria-label="Add a game">
+          +
+        </Link>
       </div>
 
       {error && <div className="notice">Could not reach Airtable. {error}</div>}
@@ -62,51 +65,66 @@ export default async function Home() {
       {games.length === 0 && !error && (
         <div className="panel">
           <h3>No games yet</h3>
-          <p className="muted" style={{ marginBottom: 0 }}>
-            Add a game in the Games table in Airtable, then come back here to
-            build the lineup.
+          <p className="muted" style={{ marginBottom: '0.75rem' }}>
+            Add your first game and you can build a lineup for it right away.
           </p>
+          <Link
+            href="/game/new"
+            className="btn"
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              textDecoration: 'none',
+              lineHeight: '2.1',
+            }}
+          >
+            Add a game
+          </Link>
         </div>
       )}
 
-      <ul className="roster panel" style={{ padding: '0.25rem 0.75rem' }}>
-        {games.map((g) => (
-          <li key={g.id}>
-            <Link
-              href={`/game/${g.id}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.8rem 0.25rem',
-                textDecoration: 'none',
-                color: 'var(--ink)',
-                minHeight: 48,
-              }}
-            >
-              <span
-                className="eyebrow"
-                style={{ width: '5.5rem', flex: 'none' }}
+      {games.length > 0 && (
+        <ul className="roster panel" style={{ padding: '0.25rem 0.75rem' }}>
+          {games.map((g) => (
+            <li key={g.id}>
+              <Link
+                href={`/game/${g.id}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.8rem 0.25rem',
+                  textDecoration: 'none',
+                  color: 'var(--ink)',
+                  minHeight: 48,
+                }}
               >
-                {formatDate(g.date)}
-              </span>
-              <span style={{ flex: 1, fontWeight: 500 }}>
-                {g.opponent || g.label}
-                {g.homeAway === 'Away' && (
-                  <span className="tag">AWAY</span>
-                )}
-              </span>
-              <span className="eyebrow">
-                {g.inningsPlayed != null
-                  ? `${g.inningsPlayed} INN`
-                  : g.status === 'Lineup Generated'
-                  ? 'READY'
-                  : 'NEW'}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+                <span
+                  className="eyebrow"
+                  style={{ width: '5.5rem', flex: 'none' }}
+                >
+                  {formatDate(g.date)}
+                </span>
+                <span style={{ flex: 1, fontWeight: 500 }}>
+                  {g.opponent || g.label}
+                  {g.homeAway === 'Away' && (
+                    <span className="tag">AWAY</span>
+                  )}
+                </span>
+                <span className="eyebrow">
+                  {g.inningsPlayed != null
+                    ? `${g.inningsPlayed} INN`
+                    : g.status === 'Lineup Generated'
+                    ? 'READY'
+                    : 'NEW'}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <AddGame />
     </main>
   );
 }
