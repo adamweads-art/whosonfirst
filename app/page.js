@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getGames, isConfigured } from '../lib/airtable';
 import Logo from './Logo';
+import RefreshTallies from './RefreshTallies';
 import AddGame from './AddGame';
 
 export const dynamic = 'force-dynamic';
@@ -125,6 +126,8 @@ export default async function Home() {
       )}
 
       <AddGame />
+
+      <RefreshTallies />
     </main>
   );
 }

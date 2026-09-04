@@ -20,6 +20,11 @@
   --red: #efb21e;         /* A's gold, used where scorer's red used to go */
   --blue: #003831;        /* same green, so nothing reads as flag-blue */
 
+  /* Field view. Faint enough to stay in the ledger palette, distinct enough
+     that grass and dirt read as different surfaces. */
+  --outfield: #e4e8d8;
+  --infield: #ede2ce;
+
   --display: 'Barlow Condensed', system-ui, sans-serif;
   --body: 'Barlow', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
@@ -205,6 +210,46 @@ h3 { font-size: 1rem; }
 }
 
 .add-btn:hover { background: var(--ink-hover); }
+
+/* Grid / Field switch. Two equal halves rather than a pill, to match the
+   stepper buttons used everywhere else. */
+.view-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.view-toggle .stepper {
+  font-family: var(--display);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-height: 42px;
+}
+
+/* Inning selector on the field view. Wraps rather than scrolls, since six
+   is the most there will ever be. */
+.inning-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.inning-tabs .stepper {
+  flex: 1 1 44px;
+  min-height: 42px;
+  font-size: 0.95rem;
+}
+
+.bench-strip {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+}
 
 .action-row .btn {
   display: flex;

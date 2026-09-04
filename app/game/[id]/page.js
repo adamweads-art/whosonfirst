@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getRoster, getGame, getAssignments } from '../../../lib/airtable';
 import { activePositions } from '../../../lib/rotation';
 import Logo from '../../Logo';
+import LineupViews from './LineupViews';
 import GameClient from './GameClient';
 
 export const dynamic = 'force-dynamic';
@@ -104,74 +105,22 @@ export default async function GamePage({ params }) {
                 marginBottom: '0.6rem',
               }}
             >
-              <h2>Field</h2>
+              <h2>Defense</h2>
               <Link href={`/game/${game.id}/card`} className="eyebrow">
-                Print card →
+                Print card &rarr;
               </Link>
             </div>
 
-            <div className="grid-scroll">
-              <table className="grid">
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'left' }}>POS</th>
-                    {Array.from({ length: inningCount }, (_, i) => (
-                      <th key={i}>{i + 1}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {positions.map((pos) => (
-                    <tr key={pos}>
-                      <th>{pos}</th>
-                      {Array.from({ length: inningCount }, (_, i) => {
-                        const who = played.find(
-                          (p) => byPlayer[p.id].innings[i] === pos
-                        );
-                        return (
-                          <td key={i}>
-                            {who ? (
-                              who.jersey != null ? (
-                                <span className="num">{who.jersey}</span>
-                              ) : (
-                                who.name.split(' ')[0]
-                              )
-                            ) : (
-                              '·'
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                  <tr className="bench-row">
-                    <th>BENCH</th>
-                    {Array.from({ length: inningCount }, (_, i) => {
-                      const sitting = played.filter(
-                        (p) => byPlayer[p.id].innings[i] === 'Bench'
-                      );
-                      return (
-                        <td key={i}>
-                          {sitting.length
-                            ? sitting
-                                .map((p) =>
-                                  p.jersey != null
-                                    ? p.jersey
-                                    : p.name.slice(0, 3)
-                                )
-                                .join(' ')
-                            : '—'}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <p className="eyebrow" style={{ marginTop: '0.6rem' }}>
-              Numbers are jerseys
-            </p>
+            <LineupViews
+              players={played.map((p) => ({
+                id: p.id,
+                name: p.name,
+                jersey: p.jersey,
+                innings: byPlayer[p.id].innings,
+              }))}
+              positions={positions}
+              inningCount={inningCount}
+            />
           </section>
         )}
 
