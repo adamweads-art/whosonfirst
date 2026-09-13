@@ -127,6 +127,22 @@ export default async function Home() {
 
       <AddGame />
 
+      <Link
+        href="/roster"
+        className="btn btn-quiet"
+        style={{
+          display: 'block',
+          textAlign: 'center',
+          textDecoration: 'none',
+          lineHeight: '2.4',
+          marginTop: '1.25rem',
+          fontSize: '0.9rem',
+          minHeight: 44,
+        }}
+      >
+        Batting order
+      </Link>
+
       <RefreshTallies />
     </main>
   );

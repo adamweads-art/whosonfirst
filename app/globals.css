@@ -251,6 +251,74 @@ h3 { font-size: 1rem; }
   font-size: 0.9rem;
 }
 
+/* Batting order reorder list */
+.order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: none;
+}
+
+.order-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+  min-height: 52px;
+}
+
+.order-list li + li { border-top: 1px solid var(--rule-faint); }
+
+.order-list .slot {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  width: 1.6rem;
+  flex: none;
+  text-align: right;
+}
+
+.order-list .who { flex: 1; font-weight: 500; }
+
+.order-list li:first-child .who::after {
+  content: 'LEADOFF';
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  background: var(--ink);
+  color: var(--ledger);
+  border-radius: 2px;
+  padding: 0.1rem 0.3rem;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+.order-list .arrows { display: flex; gap: 0.3rem; flex: none; }
+
+.order-list .arrows button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.order-list .arrows button:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--ledger);
+  border-color: var(--ink);
+}
+
+.order-list .arrows button:disabled {
+  color: var(--rule);
+  cursor: not-allowed;
+}
+
 .action-row .btn {
   display: flex;
   align-items: center;
@@ -322,6 +390,11 @@ table.grid th, table.grid td {
   text-align: center;
   white-space: nowrap;
 }
+
+/* Names need more room than jersey numbers did. The table scrolls
+   horizontally rather than squeezing names to unreadable widths. */
+table.grid tbody td { min-width: 4.2rem; }
+table.grid .bench-row td { min-width: 0; letter-spacing: 0.06em; }
 
 table.grid thead th {
   background: var(--ink);

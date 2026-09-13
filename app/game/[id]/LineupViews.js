@@ -191,19 +191,7 @@ function GridView({ players, positions, inningCount }) {
               <th>{pos}</th>
               {Array.from({ length: inningCount }, (_, i) => {
                 const who = players.find((p) => p.innings[i] === pos);
-                return (
-                  <td key={i}>
-                    {who ? (
-                      who.jersey != null ? (
-                        <span className="num">{who.jersey}</span>
-                      ) : (
-                        who.name.split(' ')[0]
-                      )
-                    ) : (
-                      '·'
-                    )}
-                  </td>
-                );
+                return <td key={i}>{who ? who.name.split(' ')[0] : '·'}</td>;
               })}
             </tr>
           ))}
@@ -215,7 +203,11 @@ function GridView({ players, positions, inningCount }) {
                 <td key={i}>
                   {sitting.length
                     ? sitting
-                        .map((p) => (p.jersey != null ? p.jersey : p.name.slice(0, 3)))
+                        .map((p) =>
+                          // Numbers here on purpose: three or four names in one
+                          // cell get truncated into uselessness.
+                          p.jersey != null ? p.jersey : p.name.split(' ')[0]
+                        )
                         .join(' ')
                     : '—'}
                 </td>
@@ -270,7 +262,7 @@ export default function LineupViews({ players, positions, inningCount }) {
 
       {view === 'grid' && (
         <p className="eyebrow" style={{ marginTop: '0.6rem' }}>
-          Numbers are jerseys
+          Bench shows jersey numbers to fit
         </p>
       )}
     </>
