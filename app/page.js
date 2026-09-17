@@ -128,7 +128,7 @@ export default async function Home() {
       <AddGame />
 
       <Link
-        href="/roster"
+        href="/practice"
         className="btn btn-quiet"
         style={{
           display: 'block',
@@ -136,6 +136,22 @@ export default async function Home() {
           textDecoration: 'none',
           lineHeight: '2.4',
           marginTop: '1.25rem',
+          fontSize: '0.9rem',
+          minHeight: 44,
+        }}
+      >
+        Practices
+      </Link>
+
+      <Link
+        href="/roster"
+        className="btn btn-quiet"
+        style={{
+          display: 'block',
+          textAlign: 'center',
+          textDecoration: 'none',
+          lineHeight: '2.4',
+          marginTop: '0.5rem',
           fontSize: '0.9rem',
           minHeight: 44,
         }}
