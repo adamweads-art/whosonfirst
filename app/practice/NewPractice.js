@@ -15,7 +15,6 @@ export default function NewPractice() {
   const [date, setDate] = useState(todayLocal());
   const [startTime, setStartTime] = useState('');
   const [location, setLocation] = useState('');
-  const [phase, setPhase] = useState('Early');
   const [error, setError] = useState(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -23,7 +22,7 @@ export default function NewPractice() {
   function save() {
     setError(null);
     startTransition(async () => {
-      const res = await createPracticeAction({ date, startTime, location, phase });
+      const res = await createPracticeAction({ date, startTime, location });
       if (res?.error) setError(res.error);
       else router.push(`/practice/${res.id}`);
     });
@@ -65,25 +64,6 @@ export default function NewPractice() {
         />
       </section>
 
-      <section className="panel">
-        <h2 style={{ marginBottom: '0.5rem' }}>Season phase</h2>
-        <div className="steppers">
-          {['Early', 'Mid', 'Late'].map((ph) => (
-            <button
-              key={ph}
-              type="button"
-              className="stepper"
-              aria-pressed={phase === ph}
-              onClick={() => setPhase(ph)}
-            >
-              {ph}
-            </button>
-          ))}
-        </div>
-        <p className="eyebrow" style={{ marginTop: '0.6rem' }}>
-          Keeps late-season drills like stealing out of week one
-        </p>
-      </section>
 
       {error && <div className="notice">{error}</div>}
 

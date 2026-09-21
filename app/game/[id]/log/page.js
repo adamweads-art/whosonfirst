@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getGame } from '../../../../lib/airtable';
 import Logo from '../../../Logo';
+import { claudeConfigured } from '../../../../lib/claude';
 import LogClient from './LogClient';
 
 export const dynamic = 'force-dynamic';
@@ -47,7 +48,7 @@ export default async function LogPage({ params }) {
         </div>
       </div>
 
-      <LogClient game={game} />
+      <LogClient game={game} photoEnabled={claudeConfigured()} />
     </main>
   );
 }

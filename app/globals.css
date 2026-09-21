@@ -739,3 +739,49 @@ table.card tr.writein th {
   padding: 0.6rem 0.8rem;
   font-size: 0.9rem;
 }
+
+/* --- Game-to-practice loop --- */
+
+.card-preview {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  margin-top: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--ledger-deep);
+}
+
+.from-games { border-left: 3px solid var(--red); }
+
+.obs { padding: 0.65rem 0; }
+.obs + .obs { border-top: 1px solid var(--rule-faint); }
+.obs-summary { font-weight: 500; margin-bottom: 0.15rem; }
+.obs.covered .obs-summary { color: var(--ink-soft); }
+
+.obs-check {
+  display: inline-block;
+  color: var(--ink);
+  font-weight: 700;
+  margin-right: 0.35rem;
+}
+
+.obs-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+
+.chip {
+  font-family: var(--body);
+  font-size: 0.82rem;
+  border: 1px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  min-height: 34px;
+  cursor: pointer;
+}
+
+.chip:hover:not(:disabled) { background: var(--ink); color: var(--ledger); }
+.chip:disabled { border-color: var(--rule); color: var(--ink-soft); cursor: default; }
+.chip.quiet { border-color: var(--rule); color: var(--ink-soft); }
+.chip.quiet:hover { background: var(--ledger-deep); color: var(--ink); }

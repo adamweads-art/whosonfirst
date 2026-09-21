@@ -296,7 +296,7 @@ export default function RunClient({ practice, blocks, drillById, playerById }) {
             {d.description && <p style={{ marginTop: '0.5rem' }}>{d.description}</p>}
             {d.coaching && (
               <div className="coaching">
-                <span className="eyebrow">Say this</span>
+                <span className="eyebrow">Coaching notes</span>
                 <p style={{ margin: '0.2rem 0 0' }}>{d.coaching}</p>
               </div>
             )}

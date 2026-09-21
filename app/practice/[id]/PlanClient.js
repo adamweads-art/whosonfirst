@@ -2,16 +2,23 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
-import { savePractice } from '../../../lib/actions';
+import { savePractice, dismissObservation } from '../../../lib/actions';
 
 const BLOCK_TYPES = ['Warmup', 'Whole Team', 'Stations', 'Transition', 'Scrimmage', 'Wrap-up'];
 
-export default function PlanClient({ practice, roster, drills, initialBlocks, target }) {
+export default function PlanClient({ practice, roster, drills, initialBlocks, target, observations = [] }) {
   const [present, setPresent] = useState(new Set(practice.attendanceIds));
   const [blocks, setBlocks] = useState(initialBlocks);
   const [openPicker, setOpenPicker] = useState(null);
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState(null);
+
+  // Game observations. `linked` maps an observation to the drill added for it,
+  // so it only counts as addressed if that drill is still in the plan at save
+  // time. `manual` covers ones handled without a library drill.
+  const [obsList, setObsList] = useState(observations);
+  const [linked, setLinked] = useState({});
+  const [manual, setManual] = useState(new Set());
 
   const drillById = useMemo(
     () => Object.fromEntries(drills.map((d) => [d.id, d])),
@@ -64,6 +71,64 @@ export default function PlanClient({ practice, roster, drills, initialBlocks, ta
     setResult(null);
   }
 
+  function planDrillIds(list = blocks) {
+    return new Set(list.flatMap((b) => b.drillIds));
+  }
+
+  /**
+   * Put a drill picked for an observation into the plan.
+   *
+   * Whole-team drills get their own block. Anything that works as a station
+   * goes into the existing stations rotation if there is one, since backhand
+   * reps belong in the rotation, not as a separate block for thirteen kids.
+   */
+  function addForObservation(obsId, drill) {
+    setBlocks((prev) => {
+      if (prev.some((b) => b.drillIds.includes(drill.id))) return prev;
+      if (drill.format !== 'Whole Team') {
+        const si = prev.findIndex((b) => b.type === 'Stations');
+        if (si !== -1) {
+          return prev.map((b, i) =>
+            i === si ? { ...b, drillIds: [...b.drillIds, drill.id] } : b
+          );
+        }
+      }
+      return [
+        ...prev,
+        {
+          key: crypto.randomUUID(),
+          type: drill.format === 'Whole Team' ? 'Whole Team' : 'Stations',
+          duration: drill.duration || 10,
+          drillIds: [drill.id],
+        },
+      ];
+    });
+    setLinked((l) => ({ ...l, [obsId]: drill.id }));
+    setResult(null);
+  }
+
+  function toggleManual(obsId) {
+    setManual((prev) => {
+      const next = new Set(prev);
+      next.has(obsId) ? next.delete(obsId) : next.add(obsId);
+      return next;
+    });
+    setResult(null);
+  }
+
+  async function dismiss(obsId) {
+    const res = await dismissObservation(obsId);
+    if (res?.ok) setObsList((l) => l.filter((o) => o.id !== obsId));
+  }
+
+  function addressedIds() {
+    const inPlan = planDrillIds();
+    const viaDrill = Object.entries(linked)
+      .filter(([, drillId]) => inPlan.has(drillId))
+      .map(([obsId]) => obsId);
+    return [...new Set([...viaDrill, ...manual])];
+  }
+
   function save() {
     setResult(null);
     startTransition(async () => {
@@ -77,13 +142,72 @@ export default function PlanClient({ practice, roster, drills, initialBlocks, ta
             rotationMinutes: b.rotationMinutes,
             notes: b.notes,
           })),
+          addressedIds: addressedIds(),
         })
       );
     });
   }
 
+  const inPlan = planDrillIds();
+
   return (
     <div className="stack">
+      {obsList.length > 0 && (
+        <section className="panel from-games">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <h2>From recent games</h2>
+            <span className="eyebrow">{obsList.length} open</span>
+          </div>
+
+          {obsList.map((o) => {
+            const matches = drills
+              .filter((d) => d.skillIds.some((id) => o.skillIds.includes(id)))
+              .slice(0, 3);
+            const covered =
+              manual.has(o.id) || (linked[o.id] && inPlan.has(linked[o.id]));
+
+            return (
+              <div className={`obs ${covered ? 'covered' : ''}`} key={o.id}>
+                <div className="obs-summary">
+                  {covered && <span className="obs-check" aria-hidden="true">✓</span>}
+                  {o.summary}
+                </div>
+                <div className="eyebrow">
+                  {[o.game, o.players.join(', '), o.skills.join(', ')]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </div>
+
+                <div className="obs-actions">
+                  {matches.map((d) => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      className="chip"
+                      disabled={inPlan.has(d.id)}
+                      onClick={() => addForObservation(o.id, d)}
+                    >
+                      {inPlan.has(d.id) ? '✓ ' : '+ '}
+                      {d.name}
+                    </button>
+                  ))}
+                  <button type="button" className="chip quiet" onClick={() => toggleManual(o.id)}>
+                    {manual.has(o.id) ? 'Undo covered' : 'Covering it'}
+                  </button>
+                  <button type="button" className="chip quiet" onClick={() => dismiss(o.id)}>
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          <p className="eyebrow" style={{ marginTop: '0.6rem' }}>
+            Checked items get marked addressed when you save the plan
+          </p>
+        </section>
+      )}
+
       <section className="panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <h2>Who's here</h2>
