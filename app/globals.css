@@ -251,6 +251,67 @@ h3 { font-size: 1rem; }
   font-size: 0.9rem;
 }
 
+.bench-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* Bench players are swap targets, so they are buttons sized for a thumb
+   rather than the comma-separated line they used to be. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0 0.7rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.chip:disabled { opacity: 0.5; cursor: default; }
+.chip-num { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-soft); }
+
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ledger);
+  box-shadow: 0 0 0 2px var(--red);
+}
+
+.chip[aria-pressed='true'] .chip-num { color: var(--ledger); }
+
+.chip-quiet { min-height: 32px; font-size: 0.82rem; margin-left: auto; }
+
+/* Field markers are buttons so they work from a keyboard, but a tap should
+   not leave a browser focus box sitting around the catcher. Keyboard focus
+   still shows. */
+svg g[role='button'] { outline: none; }
+svg g[role='button']:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* The one line that says what tapping will do. Fixed height so the field
+   does not jump between the three states it cycles through. */
+.swap-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 38px;
+  margin-top: 0.6rem;
+  padding: 0 0.7rem;
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 0.88rem;
+}
+
 /* Batting order reorder list */
 .order-list {
   list-style: none;
@@ -785,3 +846,13 @@ table.card tr.writein th {
 .chip:disabled { border-color: var(--rule); color: var(--ink-soft); cursor: default; }
 .chip.quiet { border-color: var(--rule); color: var(--ink-soft); }
 .chip.quiet:hover { background: var(--ledger-deep); color: var(--ink); }
+
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+}
+
+.btn-danger:hover { background: var(--red); color: var(--ink); }
+
+.confirm-box { border-color: var(--red); border-left: 3px solid var(--red); }

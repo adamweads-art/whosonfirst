@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getRoster, getGame, getAssignments } from '../../../lib/airtable';
 import { activePositions } from '../../../lib/rotation';
 import Logo from '../../Logo';
+import ConfirmDelete from '../../ConfirmDelete';
+import { deleteGame } from '../../../lib/actions';
 import LineupViews from './LineupViews';
 import GameClient from './GameClient';
 
@@ -61,8 +63,13 @@ export default async function GamePage({ params }) {
         (byPlayer[a.id].battingSlot ?? 99) - (byPlayer[b.id].battingSlot ?? 99)
     );
 
+  // The last inning anybody has a cell for, not how many cells are filled.
+  // A blank cell in the middle of a game used to shorten the whole grid and
+  // silently drop the last inning off the card.
+  const lastFilled = (a) =>
+    a.innings.reduce((last, v, i) => (v ? i : last), -1);
   const inningCount = mine.length
-    ? Math.max(...mine.map((a) => a.innings.filter(Boolean).length))
+    ? Math.max(0, ...mine.map((a) => lastFilled(a) + 1))
     : 0;
 
   const positions = played.length >= 7 ? activePositions(played.length) : [];
@@ -120,6 +127,7 @@ export default async function GamePage({ params }) {
               }))}
               positions={positions}
               inningCount={inningCount}
+              gameId={game.id}
             />
           </section>
         )}
@@ -173,6 +181,17 @@ export default async function GamePage({ params }) {
               : 'What happened'}
           </Link>
         )}
+
+        <ConfirmDelete
+          label="Delete this game"
+          warning={
+            inningCount > 0
+              ? 'This removes the game, its lineup, and any notes from it. Playing time gets recalculated without it.'
+              : 'This removes the game. Nothing else is affected.'
+          }
+          onDelete={deleteGame.bind(null, game.id)}
+          redirectTo="/"
+        />
       </div>
     </main>
   );

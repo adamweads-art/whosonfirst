@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { swapPlayers, movePlayer } from '../../../lib/actions';
 
 /**
  * Where each fielder stands, in the SVG's coordinate space.
@@ -23,7 +24,9 @@ const SPOTS = {
   RF: { x: 302, y: 158, label: 'below' },
 };
 
-function PositionMarker({ pos, player }) {
+const first = (name) => name.split(' ')[0];
+
+function PositionMarker({ pos, player, selected, onTap }) {
   const spot = SPOTS[pos];
   if (!spot) return null;
 
@@ -37,8 +40,25 @@ function PositionMarker({ pos, player }) {
   const nameY = leader ? y - 2 : y + 22;
   const anchor = leader ? 'start' : 'middle';
 
+  const aria = empty
+    ? `${pos} is open`
+    : `${player.name} at ${pos}${selected ? ', selected' : ''}`;
+
   return (
-    <g>
+    <g
+      role="button"
+      tabIndex={0}
+      aria-label={aria}
+      aria-pressed={selected}
+      onClick={onTap}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onTap();
+        }
+      }}
+      style={{ cursor: 'pointer' }}
+    >
       {leader && !empty && (
         <line
           x1={x + 13}
@@ -50,6 +70,19 @@ function PositionMarker({ pos, player }) {
           strokeDasharray="2 2"
         />
       )}
+
+      {/* Selection ring. Drawn under the marker so it reads as a halo. */}
+      {selected && (
+        <circle
+          cx={x}
+          cy={y}
+          r="14"
+          fill="none"
+          stroke="var(--red)"
+          strokeWidth="3"
+        />
+      )}
+
       <circle
         cx={x}
         cy={y}
@@ -59,6 +92,7 @@ function PositionMarker({ pos, player }) {
         strokeWidth="1.5"
         strokeDasharray={empty ? '3 2' : undefined}
       />
+
       {empty ? (
         <text
           x={nameX}
@@ -76,12 +110,12 @@ function PositionMarker({ pos, player }) {
             textAnchor={anchor}
             style={{
               fontSize: 12.5,
-              fontWeight: 500,
+              fontWeight: selected ? 700 : 500,
               fill: 'var(--ink)',
               fontFamily: 'var(--body)',
             }}
           >
-            {player.name.split(' ')[0]}
+            {first(player.name)}
           </text>
           <text
             x={nameX}
@@ -97,16 +131,29 @@ function PositionMarker({ pos, player }) {
           </text>
         </>
       )}
+
+      {/* Touch target. A thumb at the field is nowhere near 8.5 units wide. */}
+      <circle cx={x} cy={y} r="24" fill="transparent" />
     </g>
   );
 }
 
-function FieldView({ players, positions, inningCount }) {
-  const [inning, setInning] = useState(0);
-
+function FieldView({
+  players,
+  positions,
+  inningCount,
+  inning,
+  setInning,
+  selectedId,
+  onTapPlayer,
+  onTapEmpty,
+  busy,
+}) {
   const atPosition = (pos) =>
     players.find((p) => p.innings[inning] === pos) || null;
-  const benched = players.filter((p) => p.innings[inning] === 'Bench');
+  const benched = players.filter(
+    (p) => (p.innings[inning] || 'Bench') === 'Bench'
+  );
 
   return (
     <>
@@ -127,9 +174,14 @@ function FieldView({ players, positions, inningCount }) {
       <svg
         viewBox="0 0 380 356"
         width="100%"
-        role="img"
         aria-label={`Field positions for inning ${inning + 1}`}
-        style={{ display: 'block', marginTop: '0.75rem' }}
+        style={{
+          display: 'block',
+          marginTop: '0.75rem',
+          opacity: busy ? 0.55 : 1,
+          pointerEvents: busy ? 'none' : 'auto',
+          transition: 'opacity 120ms ease',
+        }}
       >
         <path
           d="M 48 168 A 200 200 0 0 1 332 168 L 190 310 Z"
@@ -152,23 +204,41 @@ function FieldView({ players, positions, inningCount }) {
         <path d="M 185 305 L 195 305 L 195 311 L 190 316 L 185 311 Z" fill="var(--card)" stroke="var(--rule)" strokeWidth="0.5" />
         <circle cx="190" cy="252" r="11" fill="var(--infield)" stroke="var(--rule)" strokeWidth="0.5" />
 
-        {positions.map((pos) => (
-          <PositionMarker key={pos} pos={pos} player={atPosition(pos)} />
-        ))}
+        {positions.map((pos) => {
+          const player = atPosition(pos);
+          return (
+            <PositionMarker
+              key={pos}
+              pos={pos}
+              player={player}
+              selected={Boolean(player) && player.id === selectedId}
+              onTap={() =>
+                player ? onTapPlayer(player.id) : onTapEmpty(pos)
+              }
+            />
+          );
+        })}
       </svg>
 
-      {benched.length > 0 && (
-        <div className="bench-strip">
-          <span className="eyebrow">Bench</span>
-          <span>
-            {benched
-              .map((p) =>
-                p.jersey != null ? `${p.name.split(' ')[0]} (${p.jersey})` : p.name.split(' ')[0]
-              )
-              .join(', ')}
-          </span>
+      <div className="bench-strip">
+        <span className="eyebrow">Bench</span>
+        <div className="bench-chips">
+          {benched.length === 0 && <span className="eyebrow">Nobody sitting</span>}
+          {benched.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className="chip"
+              aria-pressed={p.id === selectedId}
+              disabled={busy}
+              onClick={() => onTapPlayer(p.id)}
+            >
+              {first(p.name)}
+              {p.jersey != null && <span className="chip-num">{p.jersey}</span>}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
     </>
   );
 }
@@ -191,14 +261,16 @@ function GridView({ players, positions, inningCount }) {
               <th>{pos}</th>
               {Array.from({ length: inningCount }, (_, i) => {
                 const who = players.find((p) => p.innings[i] === pos);
-                return <td key={i}>{who ? who.name.split(' ')[0] : '·'}</td>;
+                return <td key={i}>{who ? first(who.name) : '·'}</td>;
               })}
             </tr>
           ))}
           <tr className="bench-row">
             <th>BENCH</th>
             {Array.from({ length: inningCount }, (_, i) => {
-              const sitting = players.filter((p) => p.innings[i] === 'Bench');
+              const sitting = players.filter(
+                (p) => (p.innings[i] || 'Bench') === 'Bench'
+              );
               return (
                 <td key={i}>
                   {sitting.length
@@ -206,7 +278,7 @@ function GridView({ players, positions, inningCount }) {
                         .map((p) =>
                           // Numbers here on purpose: three or four names in one
                           // cell get truncated into uselessness.
-                          p.jersey != null ? p.jersey : p.name.split(' ')[0]
+                          p.jersey != null ? p.jersey : first(p.name)
                         )
                         .join(' ')
                     : '—'}
@@ -220,8 +292,85 @@ function GridView({ players, positions, inningCount }) {
   );
 }
 
-export default function LineupViews({ players, positions, inningCount }) {
+export default function LineupViews({ players, positions, inningCount, gameId }) {
   const [view, setView] = useState('grid');
+  const [inning, setInning] = useState(0);
+  const [selectedId, setSelectedId] = useState(null);
+  const [note, setNote] = useState(null);
+  const [busy, startTransition] = useTransition();
+
+  // The board the user is touching. Swaps land here first so the field
+  // redraws on the tap, not a second later when Airtable answers. A fresh
+  // payload from the server replaces it wholesale, which is also how a
+  // failed write gets undone.
+  const [serverCopy, setServerCopy] = useState(players);
+  const [board, setBoard] = useState(players);
+  if (serverCopy !== players) {
+    setServerCopy(players);
+    setBoard(players);
+  }
+
+  const byId = Object.fromEntries(board.map((p) => [p.id, p]));
+  const selected = selectedId ? byId[selectedId] : null;
+  const spotOf = (id) => byId[id]?.innings[inning] || 'Bench';
+
+  function run(optimistic, call) {
+    const before = board;
+    setNote(null);
+    setBoard(optimistic);
+    setSelectedId(null);
+
+    startTransition(async () => {
+      const res = await call();
+      if (res?.error) {
+        setBoard(before);
+        setNote({ bad: true, text: res.error });
+      } else if (res?.warnings?.length) {
+        setNote({ bad: false, text: res.warnings.join(' ') });
+      }
+    });
+  }
+
+  function place(list, id, pos) {
+    return list.map((p) =>
+      p.id === id
+        ? { ...p, innings: p.innings.map((v, i) => (i === inning ? pos : v)) }
+        : p
+    );
+  }
+
+  function tapPlayer(id) {
+    if (busy) return;
+
+    if (!selectedId) {
+      setSelectedId(id);
+      setNote(null);
+      return;
+    }
+    if (selectedId === id) {
+      setSelectedId(null);
+      return;
+    }
+
+    const aPos = spotOf(selectedId);
+    const bPos = spotOf(id);
+    if (aPos === bPos) {
+      // Two bench players. Trading them changes nothing.
+      setSelectedId(id);
+      return;
+    }
+
+    const a = selectedId;
+    run(place(place(board, a, bPos), id, aPos), () =>
+      swapPlayers(gameId, inning, a, id)
+    );
+  }
+
+  function tapEmpty(pos) {
+    if (busy || !selectedId) return;
+    const id = selectedId;
+    run(place(board, id, pos), () => movePlayer(gameId, inning, id, pos));
+  }
 
   return (
     <>
@@ -230,7 +379,10 @@ export default function LineupViews({ players, positions, inningCount }) {
           type="button"
           className="stepper"
           aria-pressed={view === 'grid'}
-          onClick={() => setView('grid')}
+          onClick={() => {
+            setView('grid');
+            setSelectedId(null);
+          }}
         >
           Grid
         </button>
@@ -247,22 +399,68 @@ export default function LineupViews({ players, positions, inningCount }) {
       <div style={{ marginTop: '0.75rem' }}>
         {view === 'grid' ? (
           <GridView
-            players={players}
+            players={board}
             positions={positions}
             inningCount={inningCount}
           />
         ) : (
           <FieldView
-            players={players}
+            players={board}
             positions={positions}
             inningCount={inningCount}
+            inning={inning}
+            setInning={(i) => {
+              setInning(i);
+              setSelectedId(null);
+              setNote(null);
+            }}
+            selectedId={selectedId}
+            onTapPlayer={tapPlayer}
+            onTapEmpty={tapEmpty}
+            busy={busy}
           />
         )}
       </div>
 
+      {view === 'field' && (
+        <div className="swap-bar" aria-live="polite">
+          {busy && <span className="eyebrow">Saving…</span>}
+          {!busy && selected && (
+            <>
+              <span>
+                <strong>{first(selected.name)}</strong> at {spotOf(selectedId)}.
+                Tap where to put them.
+              </span>
+              <button
+                type="button"
+                className="chip chip-quiet"
+                onClick={() => setSelectedId(null)}
+              >
+                Cancel
+              </button>
+            </>
+          )}
+          {!busy && !selected && (
+            <span className="eyebrow">
+              Tap a player, then tap the spot to trade them into
+            </span>
+          )}
+        </div>
+      )}
+
+      {note && (
+        <div
+          className="notice"
+          style={{ marginTop: '0.6rem' }}
+          role={note.bad ? 'alert' : 'status'}
+        >
+          {note.bad ? note.text : `Saved. ${note.text}`}
+        </div>
+      )}
+
       {view === 'grid' && (
         <p className="eyebrow" style={{ marginTop: '0.6rem' }}>
-          Bench shows jersey numbers to fit
+          Bench shows jersey numbers to fit. Switch to Field to make changes.
         </p>
       )}
     </>
