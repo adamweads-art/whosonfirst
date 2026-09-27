@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { getRoster, getDrills, getPractices, getBlocks, getSkills, getObservations, getGames } from '../../../lib/airtable';
 import Logo from '../../Logo';
+import ConfirmDelete from '../../ConfirmDelete';
+import { deletePractice } from '../../../lib/actions';
 import PlanClient from './PlanClient';
 
 export const dynamic = 'force-dynamic';
@@ -92,6 +94,13 @@ export default async function PracticePage({ params }) {
         initialBlocks={mine}
         target={TARGET_MINUTES}
         observations={openObs}
+      />
+
+      <ConfirmDelete
+        label="Delete this practice"
+        warning="This removes the practice and its blocks. Anything it was set to address goes back to your open items."
+        onDelete={deletePractice.bind(null, practice.id)}
+        redirectTo="/practice"
       />
     </main>
   );
